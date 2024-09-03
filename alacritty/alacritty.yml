@@ -115,7 +115,7 @@ font:
         #bold italic:
         #family: "Source Code Pro Bold Italic"
 
-    size: 14.0
+    size: 16.0
   # Normal (roman) font face
   #normal:
     # Font family

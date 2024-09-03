@@ -247,16 +247,10 @@ ytdl() {
 PYTHONPATH="$SAGE_ROOT/local/lib/python"
 export PYTHONPATH
 
-alias clean_container="docker container rm -f $(docker container ls -aq)"
-alias clean_imge="docker image rm -f $(docker image ls -f reference='diamol/*' -q)"
-
-export DOCKERID="liuyaqiu"
-
-
 export PATH=$PATH:~/.local/go/bin
 export GOPATH=~/.local/go
 # 启用 Go Modules 功能
-go env -w GO111MODULE=on
+# go env -w GO111MODULE=on
 
 # 配置 GOPROXY 环境变量，以下三选一
 
@@ -269,8 +263,8 @@ go env -w  GOPROXY=https://goproxy.cn,direct
 # go eviornment path
 
 proxy() {
-    export http_proxy="socks5://127.0.0.1:1088"
-    export https_proxy="socks5://127.0.0.1:1088"
+    export http_proxy="http://127.0.0.1:20171"
+    export https_proxy="http://127.0.0.1:20171"
 }
 
 unproxy() {
@@ -278,8 +272,56 @@ unproxy() {
     unset https_proxy
 }
 
-eval $(ssh-agent)
-
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
 export PATH="/home/liuyaqiu/.rd/bin:$PATH"
 ### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
+export PATH="$HOME/.cargo/bin:$PATH"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+export PATH="/usr/local/bin:$PATH"
+
+# eval "$(ssh-agent -s)"
+
+export EDITOR=vim
+
+export GPG_TTY="$(tty)"
+export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+gpgconf --launch gpg-agent
+
+# export GNUPGHOME=~/gnupg-workspace
+export KEYID=81EF9267
+
+alias fetch-key='sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys'
+
+fpath=(/home/liuyaqiu/.zsh/completion $fpath)
+compinit
+
+# >>>> Vagrant command completion (start)
+fpath=(/opt/vagrant/embedded/gems/gems/vagrant-2.4.1/contrib/zsh $fpath)
+compinit
+# <<<<  Vagrant command completion (end)
+
+yubi-activate() {
+    sudo service pcscd restart
+    sudo service pcscd status
+}
+
+publish-blog() {
+    HOST=do-us
+    local_path=$1
+    remote_root=sites
+    if [ ! -d "$local_path" ]; then
+        echo "Error: Path '$local_path' does not exist."
+        return 1
+    fi
+    full_path=$(realpath $local_path)
+    if [ ! -z $2 ]; then
+        base_path=$remote_root/$2
+    else
+        base_path=$remote_root/$(basename $full_path)
+    fi
+    echo "sync $full_path to $HOST:"'~'/$base_path/
+    test_cmd="test -d "'~'"/${base_path} && rsync"
+    rsync -avz --delete --rsync-path=$test_cmd $full_path/ ${HOST}:'~'/${base_path}/
+}

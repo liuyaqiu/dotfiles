@@ -135,15 +135,6 @@ postblog() {
     cp $file ../_posts
 }
 
-encrypt() {
-    openssl aes-256-cfb -salt -in $1 -out $1".enc"
-}
-
-decrypt() {
-    filename=$(getfilename $1)
-    openssl aes-256-cfb -d -salt -in $1 -out $filename
-}
-
 splitfile() {
     file=$1
     size=$2
@@ -237,13 +228,6 @@ alias keyswap='setxkbmap -option "ctrl:swapcaps"'
 export MANIM_PATH='/home/liuyaqiu/.local/lib/python3.6/site-packages
 /manimlib'
 
-# ytdl() {
-#     youtube-dl --proxy socks5://127.0.0.1:1080/  $1 &
-# }
-ytdl() {
-    youtube-dl $1 &
-}
-
 PYTHONPATH="$SAGE_ROOT/local/lib/python"
 export PYTHONPATH
 
@@ -255,7 +239,7 @@ export GOPATH=~/.local/go
 # 配置 GOPROXY 环境变量，以下三选一
 
 # 1. 七牛 CDN
-go env -w  GOPROXY=https://goproxy.cn,direct
+# go env -w  GOPROXY=https://goproxy.cn,direct
 
 # 2. 阿里云
 # go env -w GOPROXY=https://mirrors.aliyun.com/goproxy/,direct
@@ -324,4 +308,18 @@ publish-blog() {
     echo "sync $full_path to $HOST:"'~'/$base_path/
     test_cmd="test -d "'~'"/${base_path} && rsync"
     rsync -avz --delete --rsync-path=$test_cmd $full_path/ ${HOST}:'~'/${base_path}/
+}
+
+export KEYID=298E544A77F7B2CCC0DCEEE5E819C7E181EF9267
+
+secret () {
+  output="${1}".$(date +%s).enc
+  gpg --encrypt --armor --output ${output} \
+    -r $KEYID "${1}" && echo "${1} -> ${output}"
+}
+
+reveal () {
+  output=$(echo "${1}" | rev | cut -c16- | rev)
+  gpg --decrypt --output ${output} "${1}" && \
+    echo "${1} -> ${output}"
 }
